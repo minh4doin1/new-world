@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { supabase } from '../services/supabaseClient';
 import { CoursesListScreenProps } from '../types/navigation';
-import { COLORS, SIZES } from '../theme';
+import { COLORS, SHADOWS, SIZES } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Course {
@@ -17,42 +17,60 @@ const CoursesListScreen = ({ navigation }: CoursesListScreenProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<{ streak: number } | null>(null);
 
-useEffect(() => {
+ useEffect(() => {
     const fetchData = async () => {
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
       try {
-        // Lấy danh sách khóa học
+        // Lấy danh sách khóa học (không đổi)
         const { data: coursesData, error: coursesError } = await supabase.functions.invoke('get-courses');
         if (coursesError) throw coursesError;
         if (coursesData.courses) setCourses(coursesData.courses);
 
-        // Lấy thông tin profile (streak)
+        // Lấy thông tin profile (thay đổi ở đây)
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('streak')
-          .eq('id', session!.user.id)
-          .single();
-        if (profileError) throw profileError;
-        setProfile(profileData);
+          .eq('id', session.user.id)
+          .single(); // Vẫn dùng .single()
+
+        // THAY ĐỔI QUAN TRỌNG: Không ném lỗi ra ngoài nữa
+        if (profileError && profileError.code !== 'PGRST116') {
+          // Chỉ log các lỗi khác, còn lỗi "không tìm thấy" thì bỏ qua
+          console.error("Error fetching profile:", profileError);
+        }
+        
+        // Nếu có dữ liệu thì set, không thì profile sẽ là null
+        if (profileData) {
+          setProfile(profileData);
+        }
 
       } catch (e) {
-        console.error(e);
+        // Catch các lỗi nghiêm trọng hơn như lỗi mạng
+        console.error("A critical error occurred:", e);
+        Alert.alert("Lỗi", "Không thể tải dữ liệu, vui lòng thử lại.");
       } finally {
         setIsLoading(false);
       }
     };
-    if (session) {
-      fetchData();
-    }
+    
+    fetchData();
   }, [session]);
 
   const StreakDisplay = () => (
     <View style={styles.streakContainer}>
-      <Text style={styles.streakText}>🔥 {profile?.streak || 0} Ngày</Text>
+      <Text style={styles.streakEmoji}>🔥</Text>
+      <View>
+        <Text style={styles.streakNumber}>{profile?.streak || 0}</Text>
+        <Text style={styles.streakLabel}>Chuỗi ngày học</Text>
+      </View>
     </View>
   );
 
   if (isLoading) {
-    return <ActivityIndicator size="large" style={styles.loader} />;
+    return <View style={styles.loaderContainer}><ActivityIndicator size="large" color={COLORS.primary} /></View>;
   }
 
   return (
@@ -65,8 +83,11 @@ useEffect(() => {
           style={styles.card}
           onPress={() => navigation.navigate('CourseDetail', { courseId: item.id, courseTitle: item.title })}
         >
-          <Text style={styles.title}>{item.title}</Text>
-          {item.description && <Text style={styles.description}>{item.description}</Text>}
+          <View>
+            <Text style={styles.cardTitle}>{item.title}</Text>
+            {item.description && <Text style={styles.cardDescription}>{item.description}</Text>}
+          </View>
+          <Text style={styles.arrow}>›</Text>
         </TouchableOpacity>
       )}
       contentContainerStyle={styles.container}
@@ -75,36 +96,34 @@ useEffect(() => {
 };
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 8,
-    marginHorizontal: 8,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  title: { fontSize: 18, fontWeight: 'bold' },
-  description: { fontSize: 14, color: '#666', marginTop: 4 },
-  container: { paddingBottom: 16, backgroundColor: COLORS.background },
-  loader: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
+  container: { padding: SIZES.padding, backgroundColor: COLORS.background },
+  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
   streakContainer: {
-    backgroundColor: COLORS.white,
-    padding: SIZES.padding,
-    margin: SIZES.padding,
+    backgroundColor: COLORS.primaryLight,
     borderRadius: SIZES.radius,
+    padding: SIZES.padding,
+    flexDirection: 'row',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2,
+    marginBottom: SIZES.padding,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
-  streakText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.success,
+  streakEmoji: { fontSize: 40, marginRight: SIZES.padding },
+  streakNumber: { fontSize: SIZES.h2, fontWeight: 'bold', color: COLORS.primary },
+  streakLabel: { fontSize: SIZES.body, color: COLORS.textSecondary },
+  card: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radius,
+    padding: SIZES.padding,
+    marginBottom: SIZES.padding,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    ...SHADOWS.medium,
   },
+  cardTitle: { fontSize: SIZES.h3, fontWeight: 'bold', color: COLORS.text },
+  cardDescription: { fontSize: SIZES.body, color: COLORS.textSecondary, marginTop: SIZES.base / 2 },
+  arrow: { fontSize: 24, color: COLORS.textSecondary },
 });
 
 export default CoursesListScreen;

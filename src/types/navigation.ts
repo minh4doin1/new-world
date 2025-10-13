@@ -1,4 +1,6 @@
 // src/types/navigation.ts
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // --- ĐỊNH NGHĨA CÁC STACK VÀ THAM SỐ CỦA CHÚNG ---
@@ -7,9 +9,12 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 export type AppStackParamList = {
   CoursesList: undefined;
   CourseDetail: { courseId: number; courseTitle: string };
-  LessonDetail: { lessonId: number; lessonTitle: string }; // MÀN HÌNH MỚI
+  LessonDetail: { lessonId: number; lessonTitle: string };
   Profile: undefined;
   Quiz: { activityId: number; quizTitle: string };
+  LiveTalk: { activityId: number; scenario: string; initialPrompt: string }; // Màn hình Live Talk
+  Pronunciation: { activityId: number; originalText: string };
+  Home: undefined;
 };
 
 // Luồng xác thực (trước khi đăng nhập)
@@ -18,6 +23,10 @@ export type AuthStackParamList = {
   SignIn: undefined;
   SignUp: undefined;
 };
+export type AppTabParamList = {
+    HomeStack: undefined;
+    Profile: undefined;
+}
 
 
 // --- ĐỊNH NGHĨA KIỂU PROPS CỤ THỂ CHO TỪNG MÀN HÌNH ---
@@ -27,10 +36,17 @@ export type AuthStackParamList = {
 export type CoursesListScreenProps = NativeStackScreenProps<AppStackParamList, 'CoursesList'>;
 export type CourseDetailScreenProps = NativeStackScreenProps<AppStackParamList, 'CourseDetail'>;
 export type ProfileScreenProps = NativeStackScreenProps<AppStackParamList, 'Profile'>;
+export type LessonDetailScreenProps = NativeStackScreenProps<AppStackParamList, 'LessonDetail'>;
+export type QuizScreenProps = NativeStackScreenProps<AppStackParamList, 'Quiz'>;
+export type LiveTalkScreenProps = NativeStackScreenProps<AppStackParamList, 'LiveTalk'>;
+export type PronunciationScreenProps = NativeStackScreenProps<AppStackParamList, 'Pronunciation'>;
+export type HomeStackScreenProps<T extends keyof AppStackParamList> = 
+  CompositeScreenProps<
+    NativeStackScreenProps<AppStackParamList, T>,
+    BottomTabScreenProps<AppTabParamList>
+  >;
 
 // Props cho các màn hình trong Auth Stack
 export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<AppStackParamList, T>;
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;
 
-export type LessonDetailScreenProps = NativeStackScreenProps<AppStackParamList, 'LessonDetail'>;
-export type QuizScreenProps = NativeStackScreenProps<AppStackParamList, 'Quiz'>;
