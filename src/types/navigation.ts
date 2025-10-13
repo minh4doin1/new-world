@@ -7,7 +7,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 export type AppStackParamList = {
   CoursesList: undefined;
   CourseDetail: { courseId: number; courseTitle: string };
+  LessonDetail: { lessonId: number; lessonTitle: string }; // MÀN HÌNH MỚI
   Profile: undefined;
+  Quiz: { activityId: number; quizTitle: string };
 };
 
 // Luồng xác thực (trước khi đăng nhập)
@@ -29,3 +31,6 @@ export type ProfileScreenProps = NativeStackScreenProps<AppStackParamList, 'Prof
 // Props cho các màn hình trong Auth Stack
 export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<AppStackParamList, T>;
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;
+
+export type LessonDetailScreenProps = NativeStackScreenProps<AppStackParamList, 'LessonDetail'>;
+export type QuizScreenProps = NativeStackScreenProps<AppStackParamList, 'Quiz'>;

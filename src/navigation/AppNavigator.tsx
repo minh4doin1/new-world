@@ -7,6 +7,8 @@ import CoursesListScreen from '../screens/CoursesListScreen';
 import CourseDetailScreen from '../screens/CourseDetailScreen';
 import ProfileScreen from '../screens/ProfileScreen'; // Import màn hình mới
 import { Button } from 'react-native';
+import LessonDetailScreen from '../screens/LessonDetailScreen';
+import QuizScreen from '../screens/QuizScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -32,6 +34,16 @@ export const AppNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{ title: 'Tài khoản' }}
+      />
+            <Stack.Screen
+        name="LessonDetail"
+        component={LessonDetailScreen}
+        options={({ route }) => ({ title: route.params.lessonTitle })}
+      />
+            <Stack.Screen
+        name="Quiz"
+        component={QuizScreen}
+        options={({ route }) => ({ title: route.params.quizTitle })}
       />
     </Stack.Navigator>
   );

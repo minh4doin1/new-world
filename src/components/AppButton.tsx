@@ -1,7 +1,7 @@
 // src/components/AppButton.tsx
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { COLORS } from '../theme';
+import { COLORS, SIZES } from '../theme';
 
 type AppButtonProps = {
   title: string;
