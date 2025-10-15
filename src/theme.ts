@@ -1,9 +1,8 @@
 // src/theme.ts
 
 export const COLORS = {
-  // Bảng màu chính - Năng động và vui tươi
-  primary: '#58CC02',      // Xanh lá cây Duolingo
-  primaryLight: '#E5F8D8',
+  primary: '#6B4EFF',     // Tím thiên hà
+  primaryLight: 'rgba(107, 78, 255, 0.1)', // Nền tím mờ
   primaryDark: '#4AA802',   // Xanh lá đậm hơn cho hiệu ứng 3D của button
   success: '#58CC02',
   
@@ -15,8 +14,11 @@ export const COLORS = {
   // Màu văn bản
   text: '#4B4B4B',          // Xám đen, dễ đọc hơn màu đen tuyền
   textSecondary: '#AFAFAF',  // Xám nhạt cho văn bản phụ
+    accent: '#FFC83D',      // Vàng/Cam của các vì sao (cho nút quan trọng)
+  accentDark: '#E6A100',  
   
   // Màu nền và các thành phần UI
+  card: '#112240', 
   background: '#FFFFFF',    // Nền trắng tinh khôi
   white: '#FFFFFF',
   border: '#E5E5E5',       // Viền xám rất nhạt

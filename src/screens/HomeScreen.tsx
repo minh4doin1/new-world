@@ -1,11 +1,12 @@
 // src/screens/HomeScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, SafeAreaView, TouchableOpacity } from 'react-native';
 import { supabase } from '../services/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { COLORS, SIZES } from '../theme';
-import { LessonNode, NodeStatus } from '../components/LessonNode';
-import { HomeStackScreenProps } from '../types/navigation'; // Cần cập nhật navigation types
+import { LessonNode, NodeStatus } from '../components/LessonNode'; // Sẽ cập nhật style sau
+import { HomeStackScreenProps } from '../types/navigation';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Định nghĩa cấu trúc dữ liệu cho một "Node" trên con đường
 type PathNode = {
@@ -27,17 +28,36 @@ const HomeHeader = ({ streak }: { streak: number }) => (
   </View>
 );
 
+const WelcomeWidget = ({ name }: { name: string }) => (
+  <View>
+    <Text style={styles.welcomeSubtitle}>CHÀO MỪNG TRỞ LẠI,</Text>
+    <Text style={styles.welcomeTitle}>{name}</Text>
+  </View>
+);
+
+const ContinueLearningWidget = ({ activeNode, onPress }: { activeNode: PathNode | null, onPress: () => void }) => {
+  if (!activeNode) return null;
+  return (
+    <TouchableOpacity style={styles.continueCard} onPress={onPress}>
+      <View>
+        <Text style={styles.cardSubheading}>Tiếp tục hành trình</Text>
+        <Text style={styles.cardHeading}>{activeNode.title}</Text>
+      </View>
+      <MaterialCommunityIcons name="arrow-right-circle" size={40} color={COLORS.accent} />
+    </TouchableOpacity>
+  );
+};
+
+// --- MÀN HÌNH HOME MỚI ---
 const HomeScreen = ({ navigation }: HomeStackScreenProps<'Home'>) => {
   const { session } = useAuth();
   const [path, setPath] = useState<PathNode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [profile, setProfile] = useState<{ streak: number } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string, streak: number } | null>(null);
 
 const fetchData = useCallback(async () => {
     if (!session) return;
     try {
-      console.log("Bắt đầu fetch dữ liệu..."); // LOG 1
-
       const { data: courses, error: coursesError } = await supabase
         .from('courses')
         .select(`id, title, lessons (id, title, order)`)
@@ -46,19 +66,17 @@ const fetchData = useCallback(async () => {
         
       if (coursesError) throw coursesError;
       
-      console.log("Dữ liệu khóa học nhận được:", JSON.stringify(courses, null, 2)); // LOG 2
 
       if (!courses || courses.length === 0) {
         console.warn("CẢNH BÁO: Không có khóa học nào được trả về từ Supabase. Kiểm tra lại RLS."); // LOG 3
       }
       if (coursesError) throw coursesError;
-
       // Lấy tiến độ của người dùng
       const { data: completedProgress, error: progressError } = await supabase
         .from('user_activity_log')
-        .select('lesson_id') // Chỉ cần chọn cột lesson_id
+        .select('lesson_id')
         .eq('user_id', session.user.id)
-        .not('lesson_id', 'is', null); // Chỉ lấy những dòng có lesson_id
+        .not('lesson_id', 'is', null);
       
       if (progressError) throw progressError;
 
@@ -66,15 +84,13 @@ const fetchData = useCallback(async () => {
       const completedLessonIds = new Set(
         completedProgress.map(p => p.lesson_id)
       );
-      // Lấy thông tin profile
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles').select('streak').eq('id', session.user.id).single();
+        .from('profiles').select('full_name, streak').eq('id', session.user.id).single();
       if (profileError) console.error(profileError.message);
       setProfile(profileData);
 
-      // BIẾN ĐỔI DỮ LIỆU THÀNH CON ĐƯỜNG
       let tempPath: PathNode[] = [];
-      let isNextNodeActive = true; // Node đầu tiên luôn active
+      let isNextNodeActive = true; 
 
       courses.forEach(course => {
         tempPath.push({ type: 'SECTION_HEADER', id: `course_${course.id}`, title: course.title, status: 'COMPLETED' });
@@ -104,43 +120,81 @@ const fetchData = useCallback(async () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
+  const activeNode = path.find(node => node.status === 'ACTIVE') || null;
   if (isLoading) {
     return <View style={styles.loader}><ActivityIndicator size="large" color={COLORS.primary} /></View>;
   }
 
-  return (
+ return (
     <SafeAreaView style={styles.safeArea}>
-      <HomeHeader streak={profile?.streak || 0} />
       <ScrollView contentContainerStyle={styles.container}>
-        {path.map((node, index) => {
-          if (node.type === 'SECTION_HEADER') {
-            return <Text key={node.id} style={styles.sectionTitle}>{node.title}</Text>;
-          }
-          
-          // Logic để sắp xếp node sang trái hoặc phải
-          const alignment = index % 4 === 1 || index % 4 === 2 ? 'flex-start' : 'flex-end';
-          
-          return (
-            <View key={node.id} style={[styles.nodeWrapper, { alignItems: alignment }]}>
-              <LessonNode
-                title={node.title}
-                status={node.status}
-                onPress={() => navigation.navigate('LessonDetail', {
+        {/* Widget Chào mừng */}
+        <WelcomeWidget name={profile?.full_name || 'Nhà du hành'} />
+
+        {/* Widget Tiếp tục học */}
+        <ContinueLearningWidget 
+          activeNode={activeNode} 
+          onPress={() => {
+            if (activeNode) {
+              // CHÚNG TA SẼ SỬA ĐIỂM ĐẾN NÀY Ở PHẦN 2
+              navigation.navigate('LessonSession', {
+                lessonId: activeNode.id as number,
+                lessonTitle: activeNode.title,
+              });
+            }
+          }}
+        />
+
+        {/* Con đường học tập (bây giờ chỉ là một phần của HomeScreen) */}
+        <View style={styles.pathContainer}>
+            <Text style={styles.pathTitle}>Bản đồ các vì sao</Text>
+            {path.map((node, index) => {
+                if (node.type === 'SECTION_HEADER') {
+                    return <Text key={node.id} style={styles.sectionTitle}>{node.title}</Text>;
+                }
+                const alignment = index % 4 < 2 ? 'flex-start' : 'flex-end'; // Zic-zac
+                return (
+                    <View key={node.id} style={[styles.nodeWrapper, { alignItems: alignment }]}>
+                        <LessonNode
+                            title={node.title} status={node.status}
+                                            onPress={() => navigation.navigate('LessonSession', {
                   lessonId: node.id as number,
                   lessonTitle: node.title,
                 })}
-              />
-            </View>
-          );
-        })}
+                        />
+                    </View>
+                );
+            })}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
+// --- STYLESHEET MỚI HOÀN TOÀN ---
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.background },
+  container: { padding: SIZES.padding },
+  // Welcome
+  welcomeSubtitle: { color: COLORS.textSecondary, fontSize: SIZES.body, fontWeight: 'bold' },
+  welcomeTitle: { color: COLORS.text, fontSize: SIZES.h1, fontWeight: 'bold', marginBottom: SIZES.padding },
+  // Continue Card
+  continueCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: SIZES.radius,
+    padding: SIZES.padding,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SIZES.padding * 2,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  cardSubheading: { color: COLORS.textSecondary, fontSize: SIZES.caption, fontWeight: 'bold' },
+  cardHeading: { color: COLORS.accent, fontSize: SIZES.h3, fontWeight: 'bold' },
+  // Path
+  pathContainer: { marginTop: SIZES.padding },
+  pathTitle: { color: COLORS.text, fontSize: SIZES.h2, fontWeight: 'bold', marginBottom: SIZES.padding },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   headerContainer: {
     paddingHorizontal: SIZES.padding,
@@ -155,10 +209,6 @@ const styles = StyleSheet.create({
   streakContainer: { flexDirection: 'row', alignItems: 'center' },
   streakEmoji: { fontSize: 24, marginRight: SIZES.base },
   streakNumber: { fontSize: SIZES.h3, fontWeight: 'bold', color: COLORS.text },
-  container: {
-    paddingVertical: SIZES.padding,
-    paddingHorizontal: SIZES.padding * 2,
-  },
   sectionTitle: {
     fontSize: SIZES.h2,
     fontWeight: 'bold',

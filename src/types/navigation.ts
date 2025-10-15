@@ -14,6 +14,7 @@ export type AppStackParamList = {
   Quiz: { activityId: number; quizTitle: string };
   LiveTalk: { activityId: number; scenario: string; initialPrompt: string }; // Màn hình Live Talk
   Pronunciation: { activityId: number; originalText: string };
+  LessonSession: { lessonId: number; lessonTitle: string };
   Home: undefined;
 };
 
