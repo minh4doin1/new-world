@@ -6,13 +6,23 @@ import { AppTextInput } from '../components/AppTextInput';
 import { AppButton } from '../components/AppButton';
 import { COLORS, SIZES } from '../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import icon
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
 
 const SignInScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const handleSignIn = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  const handleSignIn = async () => { /* ... logic không đổi ... */ };
+    if (error) {
+      Alert.alert('Lỗi Đăng nhập', error.message || 'Thông tin đăng nhập không chính xác.');
+    }
+    // Nếu thành công, onAuthStateChange trong AuthContext sẽ tự động xử lý việc fetch profile và điều hướng.
+    // Không cần làm gì thêm ở đây.
+    setLoading(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -46,6 +56,8 @@ const SignInScreen = () => {
         
         <View style={styles.footer}>
           <AppButton title="Đăng nhập" onPress={handleSignIn} loading={loading} />
+          <View style={{marginVertical: 8}} />
+          <GoogleSignInButton />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

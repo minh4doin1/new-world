@@ -28,7 +28,11 @@ export type AppTabParamList = {
     HomeStack: undefined;
     Profile: undefined;
 }
-
+export type OnboardingStackParamList = {
+  Welcome: undefined;
+  LanguageSelect: undefined;
+  PlacementQuiz: { targetLanguage: string };
+};
 
 // --- ĐỊNH NGHĨA KIỂU PROPS CỤ THỂ CHO TỪNG MÀN HÌNH ---
 // Đây là phần đã được sửa lỗi và bổ sung
@@ -41,6 +45,8 @@ export type LessonDetailScreenProps = NativeStackScreenProps<AppStackParamList, 
 export type QuizScreenProps = NativeStackScreenProps<AppStackParamList, 'Quiz'>;
 export type LiveTalkScreenProps = NativeStackScreenProps<AppStackParamList, 'LiveTalk'>;
 export type PronunciationScreenProps = NativeStackScreenProps<AppStackParamList, 'Pronunciation'>;
+export type OnboardingStackScreenProps<T extends keyof OnboardingStackParamList> = 
+  NativeStackScreenProps<OnboardingStackParamList, T>;
 export type HomeStackScreenProps<T extends keyof AppStackParamList> = 
   CompositeScreenProps<
     NativeStackScreenProps<AppStackParamList, T>,

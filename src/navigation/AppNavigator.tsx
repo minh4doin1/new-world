@@ -13,6 +13,7 @@ import LessonDetailScreen from '../screens/LessonDetailScreen';
 import QuizScreen from '../screens/QuizScreen';
 import LiveTalkScreen from '../screens/LiveTalkScreen';
 import PronunciationScreen from '../screens/PronunciationScreen';
+import LessonSessionScreen from '../screens/LessonSessionScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -34,6 +35,7 @@ const HomeStack = () => {
       <Stack.Screen name="Quiz" component={QuizScreen} options={({ route }) => ({ title: route.params.quizTitle, headerShadowVisible: false })}  />
       <Stack.Screen name="LiveTalk" component={LiveTalkScreen} options={{ title: 'Luyện Giao tiếp' , headerShadowVisible: false}} />
       <Stack.Screen name="Pronunciation" component={PronunciationScreen} options={{ title: 'Luyện Phát âm', headerShadowVisible: false }} />
+      <Stack.Screen name="LessonSession" component={LessonSessionScreen} options={({ route }) => ({ title: route.params.lessonTitle })} />
     </Stack.Navigator>
   );
 };
