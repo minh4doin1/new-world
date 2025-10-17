@@ -1,29 +1,32 @@
 // src/theme.ts
 
 export const COLORS = {
-  primary: '#6B4EFF',     // Tím thiên hà
-  primaryLight: 'rgba(107, 78, 255, 0.1)', // Nền tím mờ
-  primaryDark: '#4AA802',   // Xanh lá đậm hơn cho hiệu ứng 3D của button
-  success: '#58CC02',
-  
-  secondary: '#1CB0F6',     // Xanh dương cho thông tin, link
-  
-  danger: '#FF4B4B',        // Đỏ cho lỗi hoặc hành động nguy hiểm
-  warning: '#FFC800',      // Vàng cho cảnh báo
-  
+  // Bảng màu "Bình minh Nhiệt đới"
+  primary: '#14B8A6',      // Xanh mòng két
+  primaryDark: '#0F766E',   // Xanh đậm hơn
+  primaryLight: '#D1FAE5',  // Nền xanh rất nhạt
+
+  accent: '#FF7A5A',       // Cam san hô
+  accentDark: '#E65B3E',   // Cam đậm hơn
+
   // Màu văn bản
-  text: '#4B4B4B',          // Xám đen, dễ đọc hơn màu đen tuyền
-  textSecondary: '#AFAFAF',  // Xám nhạt cho văn bản phụ
-    accent: '#FFC83D',      // Vàng/Cam của các vì sao (cho nút quan trọng)
-  accentDark: '#E6A100',  
-  
-  // Màu nền và các thành phần UI
-  card: '#112240', 
-  background: '#FFFFFF',    // Nền trắng tinh khôi
+  text: '#334155',         // Xám đậm
+  textSecondary: '#64748B', // Xám nhạt hơn
   white: '#FFFFFF',
-  border: '#E5E5E5',       // Viền xám rất nhạt
-  disabled: '#CDCDCD',      // Màu cho trạng thái vô hiệu hóa
-  disabledBorder: '#AFAFAF',
+
+  // Màu nền và các thành phần UI
+  background: '#F8F5F2',   // Trắng ngà
+  card: '#FFFFFF',         // Thẻ trắng tinh
+  border: '#E2E8F0',       // Viền xám nhạt
+  
+  disabled: '#E2E8F0',
+  disabledBorder: '#CBD5E1',
+
+  success: '#34D399',
+  danger: '#EF4444',
+  warning: '#FBBF24',
+  infoLight: '#FEF3C7', // Vàng chanh nhẹ
+  info: '#F59E0B',
 };
 
 export const SIZES = {

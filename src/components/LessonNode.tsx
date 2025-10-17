@@ -7,26 +7,28 @@ import { COLORS, SIZES } from '../theme';
 export type NodeStatus = 'LOCKED' | 'ACTIVE' | 'COMPLETED';
 
 type LessonNodeProps = {
-  title: string;
   status: NodeStatus;
   onPress: () => void;
-  // Thêm các icon khác cho các loại bài học đặc biệt
-  iconName?: keyof typeof MaterialCommunityIcons.glyphMap;
+  is_test?: boolean; // <-- THÊM PROP is_test
 };
 
-export const LessonNode = ({ title, status, onPress, iconName = 'star-circle' }: LessonNodeProps) => {
+export const LessonNode = ({ status, onPress, is_test = false }: LessonNodeProps) => {
   const isLocked = status === 'LOCKED';
   const isActive = status === 'ACTIVE';
 
   const NodeIcon = () => {
     if (isLocked) return <MaterialCommunityIcons name="lock" size={32} color={COLORS.disabledBorder} />;
     if (status === 'COMPLETED') return <MaterialCommunityIcons name="check-bold" size={32} color={COLORS.primary} />;
-    return <MaterialCommunityIcons name={iconName} size={32} color={COLORS.white} />;
+    // SỬA ĐỔI: Nếu là bài test, hiển thị icon cúp
+    if (is_test) return <MaterialCommunityIcons name="trophy-variant" size={32} color={COLORS.white} />;
+    return <MaterialCommunityIcons name="star-circle" size={32} color={COLORS.white} />;
   };
 
-const pressableStyle = ({ pressed }: PressableStateCallbackType) => [
+  const pressableStyle = ({ pressed }: PressableStateCallbackType) => [
     styles.nodeContainer,
     styles[status],
+    // SỬA ĐỔI: Bài test có thể có màu khác
+    isActive && is_test && styles.ACTIVE_TEST,
     pressed && isActive && styles.nodePressed,
   ];
 
@@ -35,7 +37,8 @@ const pressableStyle = ({ pressed }: PressableStateCallbackType) => [
       <NodeIcon />
       {isActive && (
         <View style={styles.startButton}>
-          <Text style={styles.startButtonText}>BẮT ĐẦU</Text>
+          {/* SỬA ĐỔI: Thay đổi văn bản cho bài test */}
+          <Text style={styles.startButtonText}>{is_test ? "LÀM BÀI" : "BẮT ĐẦU"}</Text>
         </View>
       )}
     </Pressable>
@@ -59,6 +62,11 @@ const styles = StyleSheet.create({
   ACTIVE: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primaryDark,
+  },
+  // THÊM STYLE MỚI cho bài test
+  ACTIVE_TEST: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accentDark,
   },
   COMPLETED: {
     backgroundColor: COLORS.white,

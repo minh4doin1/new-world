@@ -5,7 +5,22 @@ export type FillInBlankContent = {
   sentence_parts: [string, string]; // Một mảng có đúng 2 phần tử string
   correct_answer: string;
 };
+export type LessonContent = {
+  html_content: string;
+};
 
+export type QuizMcqContent = {
+  question_text: string;
+  options: string[];
+  correct_answer: string;
+};
+export type PronunciationContent = {
+  text_to_pronounce: string;
+};
+export type SentenceScrambleContent = {
+  scrambled_words: string[];
+  correct_sentence: string;
+};
 // Bạn có thể thêm các kiểu khác ở đây trong tương lai
 // export type McqContent = {
 //   question_text: string;

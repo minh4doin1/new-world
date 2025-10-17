@@ -9,7 +9,7 @@ type Profile = Tables<'profiles'>;
 type AuthContextType = {
   session: Session | null;
   profile: Profile | null;
-  loading: boolean;
+  loading: boolean; // Giữ lại loading để xử lý màn hình chờ ban đầu
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,54 +21,47 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Bắt đầu với trạng thái loading
 
   useEffect(() => {
-    setLoading(true);
-    console.log('[AuthContext] useEffect triggered. Starting session check...');
+    console.log('[AuthContext] Setting up onAuthStateChange listener...');
 
-    // 1. Lấy session ban đầu
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('[AuthContext] Initial getSession() result. Session exists:', !!session);
+    // onAuthStateChange là nguồn chân lý duy nhất
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log(`[AuthContext] onAuthStateChange event: ${_event}. Session exists:`, !!session);
+      
       setSession(session);
-      if (session) {
-        const { data: userProfile } = await supabase
+
+      if (session?.user) {
+        // Nếu có session, fetch profile
+        const { data: userProfile, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
+        
+        if (error && error.code !== 'PGRST116') {
+            console.error("[AuthContext] Error fetching profile:", error);
+        }
         setProfile(userProfile);
-        console.log('[AuthContext] Initial profile loaded.');
+        console.log("[AuthContext] Profile set:", userProfile);
+      } else {
+        // Nếu không có session, xóa profile
+        setProfile(null);
       }
+      
+      // Quan trọng: Set loading thành false SAU KHI tất cả đã được xử lý
       setLoading(false);
     });
 
-    // 2. Lắng nghe các thay đổi trạng thái đăng nhập/đăng xuất
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`[AuthContext] onAuthStateChange event: ${event}`);
-      setSession(session);
-      
-      if (session) {
-        const { data: userProfile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        setProfile(userProfile);
-        console.log('[AuthContext] Profile updated on auth state change.');
-      } else {
-        setProfile(null);
-        console.log('[AuthContext] Session ended, profile cleared.');
-      }
-    });
-
-    // 3. Dọn dẹp khi component unmount
+    // Dọn dẹp listener khi component unmount
     return () => {
-      authSubscription.unsubscribe();
+      console.log('[AuthContext] Unsubscribing from auth state changes.');
+      subscription.unsubscribe();
     };
-  }, []);
+  }, []); // Phụ thuộc rỗng để đảm bảo chỉ chạy MỘT LẦN
 
-  // 4. MỘT useEffect RIÊNG ĐỂ LẮNG NGHE THAY ĐỔI PROFILE (REALTIME)
+  // useEffect để lắng nghe thay đổi profile (giữ nguyên)
   useEffect(() => {
     if (!session?.user) return;
 

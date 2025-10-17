@@ -12,7 +12,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import LessonDetailScreen from '../screens/LessonDetailScreen';
 import QuizScreen from '../screens/QuizScreen';
 import LiveTalkScreen from '../screens/LiveTalkScreen';
-import PronunciationScreen from '../screens/PronunciationScreen';
+// import PronunciationScreen from '../screens/PronunciationScreen';
+import PronunciationScreen from '../screens/PronunciationScreen.web';
 import LessonSessionScreen from '../screens/LessonSessionScreen';
 
 const Tab = createBottomTabNavigator();
