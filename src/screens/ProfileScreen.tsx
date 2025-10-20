@@ -10,6 +10,7 @@ import { AppButton } from '../components/AppButton';
 import { StatCard } from '../components/profile/StatCard';
 import { COLORS, SIZES, SHADOWS } from '../theme';
 import { Tables } from '../types/database.types';
+import { AppTabScreenProps } from '../types/navigation';
 
 type ProfileData = {
   profile: Tables<'profiles'>;
@@ -17,7 +18,7 @@ type ProfileData = {
   daily_xp_summary: { date: string, xp: number }[];
 }
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }: AppTabScreenProps<'Profile'>) => {
   const { session } = useAuth();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +32,7 @@ const ProfileScreen = () => {
       });
       if (error) throw error;
       setProfileData(data);
-    } catch (e: any) {
+    } catch (e: any)      {
       Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ: " + e.message);
     } finally {
       setIsLoading(false);
@@ -67,7 +68,6 @@ const ProfileScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* === Header Cá nhân === */}
         <View style={styles.header}>
           <Image 
             source={{ uri: profile.avatar_url || 'https://i.pravatar.cc/150' }} 
@@ -79,14 +79,12 @@ const ProfileScreen = () => {
           </Text>
         </View>
 
-        {/* === Bảng Thống kê Nhanh === */}
         <View style={styles.statsGrid}>
           <StatCard icon="star-four-points" value={profile.xp} label="Tổng XP" color={COLORS.warning} />
           <StatCard icon="fire" value={profile.streak} label="Streak" color={COLORS.danger} />
           <StatCard icon="diamond-stone" value={profile.lingots} label="Lingots" color={COLORS.primary} />
         </View>
         
-        {/* === Biểu đồ Hoạt động Hàng tuần === */}
         <View style={styles.card}>
             <Text style={styles.cardTitle}>Hoạt động 7 ngày qua</Text>
             <BarChart
@@ -102,11 +100,15 @@ const ProfileScreen = () => {
             />
         </View>
         
-        {/* === Khu vực Hành động === */}
         <View style={styles.actions}>
+          <AppButton 
+            title="Khám phá khóa học mới" 
+            onPress={() => navigation.navigate('HomeStack', { screen: 'CourseDiscovery' })}
+            variant='primary'
+            style={{ marginBottom: SIZES.base }}
+          />
           <AppButton title="Đăng xuất" onPress={handleSignOut} variant="danger" />
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );

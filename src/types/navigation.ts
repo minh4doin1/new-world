@@ -1,6 +1,6 @@
 // src/types/navigation.ts
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { CompositeScreenProps } from '@react-navigation/native';
+import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // --- ĐỊNH NGHĨA CÁC STACK VÀ THAM SỐ CỦA CHÚNG ---
@@ -20,6 +20,7 @@ export type AppStackParamList = {
     allLessons: { id: number, title: string }[];
     onComplete: () => void;
   };
+  CourseDiscovery: undefined;
   Home: undefined;
 };
 
@@ -30,7 +31,7 @@ export type AuthStackParamList = {
   SignUp: undefined;
 };
 export type AppTabParamList = {
-    HomeStack: undefined;
+    HomeStack: NavigatorScreenParams<AppStackParamList>;
     Profile: undefined;
 }
 export type OnboardingStackParamList = {
@@ -57,7 +58,8 @@ export type HomeStackScreenProps<T extends keyof AppStackParamList> =
     NativeStackScreenProps<AppStackParamList, T>,
     BottomTabScreenProps<AppTabParamList>
   >;
-
+export type AppTabScreenProps<T extends keyof AppTabParamList> = 
+  BottomTabScreenProps<AppTabParamList, T>;
 // Props cho các màn hình trong Auth Stack
 export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<AppStackParamList, T>;
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;

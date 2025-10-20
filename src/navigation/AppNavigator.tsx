@@ -2,7 +2,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { AppStackParamList } from '../types/navigation';
+import { AppStackParamList,AppTabParamList } from '../types/navigation';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../theme';
 
@@ -15,8 +15,9 @@ import LiveTalkScreen from '../screens/LiveTalkScreen';
 // import PronunciationScreen from '../screens/PronunciationScreen';
 import PronunciationScreen from '../screens/PronunciationScreen.web';
 import LessonSessionScreen from '../screens/LessonSessionScreen';
+import CourseDiscoveryScreen from '../screens/CourseDiscoveryScreen';
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<AppTabParamList>();
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
 // Tạo một Stack riêng cho luồng Home -> Lesson -> Activity
@@ -37,6 +38,7 @@ const HomeStack = () => {
       <Stack.Screen name="LiveTalk" component={LiveTalkScreen} options={{ title: 'Luyện Giao tiếp' , headerShadowVisible: false}} />
       <Stack.Screen name="Pronunciation" component={PronunciationScreen} options={{ title: 'Luyện Phát âm', headerShadowVisible: false }} />
       <Stack.Screen name="LessonSession" component={LessonSessionScreen} options={({ route }) => ({ title: route.params.lessonTitle })} />
+      <Stack.Screen name="CourseDiscovery" component={CourseDiscoveryScreen} options={{ title: 'Khám phá Khóa học' }} />
     </Stack.Navigator>
   );
 };

@@ -5,29 +5,26 @@ import Collapsible from 'react-native-collapsible';
 import { COLORS, SIZES } from '../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LessonNode } from './LessonNode';
-import { BilingualText } from '../types/common.types'; // <-- Import kiểu mới
-import { getDisplayTitleParts } from '../utils/textUtils'; // <-- Import helper
+import { BilingualText } from '../types/common.types';
+import { getDisplayTitleParts } from '../utils/textUtils';
 
-// Cập nhật kiểu LessonData
 export type LessonData = {
   id: number;
-  title: BilingualText; // <-- Thay đổi thành BilingualText
+  title: BilingualText;
   status: 'LOCKED' | 'ACTIVE' | 'COMPLETED';
-  is_test: boolean; // <-- Thêm is_test
+  is_test: boolean;
 };
 
 type CourseSectionProps = {
   courseTitle: BilingualText;
-  unitTitle: BilingualText; // <-- Thêm unit title
+  unitTitle: BilingualText;
   lessons: LessonData[];
-  onLessonPress: (lesson: LessonData) => void; // <-- Truyền cả object lesson
+  onLessonPress: (lesson: LessonData) => void;
   targetLanguage: string;
 };
 
 export const CourseSection = ({ courseTitle, unitTitle, lessons, onLessonPress, targetLanguage }: CourseSectionProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
-
-  // Sử dụng helper để hiển thị title
   const { main: displayUnitTitle, sub: displayUnitSubtitle } = getDisplayTitleParts(unitTitle, targetLanguage);
 
   return (
@@ -49,10 +46,11 @@ export const CourseSection = ({ courseTitle, unitTitle, lessons, onLessonPress, 
           {lessons.map((lesson, index) => {
             const alignment = index % 4 < 2 ? 'flex-start' : 'flex-end';
             return (
-              <View key={lesson.id} style={[styles.nodeWrapper, { alignItems: alignment }]}>
+              // SỬA LỖI: Đảm bảo key là duy nhất tuyệt đối
+              <View key={`${lesson.id}-${index}`} style={[styles.nodeWrapper, { alignItems: alignment }]}>
                 <LessonNode
                   status={lesson.status}
-                  is_test={lesson.is_test} // <-- Truyền prop is_test
+                  is_test={lesson.is_test}
                   onPress={() => onLessonPress(lesson)}
                 />
               </View>
